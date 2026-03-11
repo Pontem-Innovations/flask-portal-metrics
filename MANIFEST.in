@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+recursive-include flask_portal_metrics/static *.js
+recursive-include tests *.py
+global-exclude __pycache__
+global-exclude *.py[cod]

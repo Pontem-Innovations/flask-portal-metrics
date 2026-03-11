@@ -1,0 +1,110 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flask-portal-metrics"
+version = "1.0.0"
+description = "Drop-in user activity tracking for Flask applications with Power BI integration"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Pontem Innovations", email = "dev@ponteminnovations.com"}
+]
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Monitoring",
+]
+keywords = [
+    "flask",
+    "analytics", 
+    "metrics",
+    "powerbi",
+    "tracking",
+    "user-activity",
+    "middleware",
+    "sqlalchemy",
+]
+dependencies = [
+    "Flask>=2.0.0",
+    "Flask-SQLAlchemy>=3.0.0",
+    "SQLAlchemy>=1.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-flask>=1.2.0",
+    "coverage>=6.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=4.0.0",
+    "mypy>=0.950",
+]
+async = [
+    "celery>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/pontem-innovations/flask-portal-metrics"
+Documentation = "https://github.com/pontem-innovations/flask-portal-metrics#readme"
+Repository = "https://github.com/pontem-innovations/flask-portal-metrics"
+Issues = "https://github.com/pontem-innovations/flask-portal-metrics/issues"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+flask_portal_metrics = ["static/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 100
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["flask_portal_metrics"]
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
