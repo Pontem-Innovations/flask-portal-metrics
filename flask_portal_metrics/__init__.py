@@ -32,7 +32,7 @@ Advanced Usage:
     data = metrics.export_for_powerbi(date_range=('2026-01-01', '2026-03-10'))
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __author__ = "Pontem Innovations"
 __email__ = "dev@ponteminnovations.com"
 __license__ = "MIT"

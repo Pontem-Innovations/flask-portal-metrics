@@ -10,7 +10,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="flask-portal-metrics",
-    version="1.0.1",
+    version="1.0.2",
     description="Drop-in user activity tracking for Flask applications with Power BI integration",
     long_description=long_description,
     long_description_content_type="text/markdown",

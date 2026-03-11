@@ -35,6 +35,7 @@ class PortalMetricsConfig:
         retention_days: Days to retain data (0 = no auto-cleanup)
         enable_export_endpoint: Enable Power BI export endpoint
         export_endpoint: URL for export endpoint
+        auto_create_tables: Automatically create database tables
         async_enabled: Use async writes (requires Celery)
     """
 
@@ -51,6 +52,7 @@ class PortalMetricsConfig:
         retention_days: int = 90,
         enable_export_endpoint: bool = True,
         export_endpoint: str = "/api/metrics/powerbi",
+        auto_create_tables: bool = True,
     ):
         self.schema = schema
         self.track_forms = track_forms
@@ -73,6 +75,7 @@ class PortalMetricsConfig:
         self.retention_days = retention_days
         self.enable_export_endpoint = enable_export_endpoint
         self.export_endpoint = export_endpoint
+        self.auto_create_tables = auto_create_tables
         self.async_enabled = False
         self._celery = None
 
@@ -90,6 +93,7 @@ class PortalMetricsConfig:
             "retention_days": self.retention_days,
             "enable_export_endpoint": self.enable_export_endpoint,
             "export_endpoint": self.export_endpoint,
+            "auto_create_tables": self.auto_create_tables,
             "async_enabled": self.async_enabled,
         }
 
@@ -148,6 +152,7 @@ class PortalMetrics:
         retention_days: int = 90,
         enable_export_endpoint: bool = True,
         export_endpoint: str = "/api/metrics/powerbi",
+        auto_create_tables: bool = True,
     ):
         """Initialize PortalMetrics.
 
@@ -165,6 +170,7 @@ class PortalMetrics:
             retention_days: Days to retain data (0 = no auto-cleanup)
             enable_export_endpoint: Enable Power BI export endpoint
             export_endpoint: URL for export endpoint
+            auto_create_tables: Automatically create database tables on init
         """
         self.app: Optional[Flask] = None
         self.db: Optional[SQLAlchemy] = db  # Store db if passed for app factory pattern
@@ -186,6 +192,7 @@ class PortalMetrics:
             retention_days=retention_days,
             enable_export_endpoint=enable_export_endpoint,
             export_endpoint=export_endpoint,
+            auto_create_tables=auto_create_tables,
         )
 
         if app is not None:
@@ -218,6 +225,10 @@ class PortalMetrics:
 
         # Create models
         self.models = create_models(self.db, self.config.schema)
+
+        # Auto-create database tables if enabled
+        if self.config.auto_create_tables:
+            self._create_tables(app)
 
         # Initialize middleware
         self._middleware = MetricsMiddleware(
@@ -266,6 +277,49 @@ class PortalMetrics:
 
         if self.config.retention_days > 0:
             logger.info(f"Data retention: {self.config.retention_days} days")
+
+    def _create_tables(self, app: Flask) -> None:
+        """Create database tables for portal metrics.
+
+        Only creates the portal_metrics_* tables, not all tables.
+
+        Args:
+            app: Flask application instance
+        """
+        with app.app_context():
+            try:
+                # Create only portal metrics tables
+                tables_to_create = [
+                    model.__table__ for model in self.models.values()
+                    if hasattr(model, '__table__')
+                ]
+                self.db.metadata.create_all(
+                    self.db.engine,
+                    tables=tables_to_create
+                )
+                logger.info("Portal metrics database tables created successfully")
+            except Exception as e:
+                logger.warning(f"Could not auto-create tables: {e}. "
+                             "You may need to create them manually with db.create_all()")
+
+    def create_tables(self) -> None:
+        """Manually create database tables for portal metrics.
+
+        Call this method if you set auto_create_tables=False and need
+        to create the tables at a specific time.
+
+        Example:
+            metrics = PortalMetrics(db=db, auto_create_tables=False)
+            # ... later in your app setup
+            with app.app_context():
+                metrics.create_tables()
+        """
+        if self.app is None:
+            raise RuntimeError(
+                "PortalMetrics must be initialized with an app before "
+                "calling create_tables(). Call init_app(app) first."
+            )
+        self._create_tables(self.app)
 
     def _register_static_blueprint(self, app: Flask) -> None:
         """Register blueprint for serving static JavaScript files.
