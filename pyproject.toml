@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flask-portal-metrics"
-version = "1.0.0"
+version = "1.0.1"
 description = "Drop-in user activity tracking for Flask applications with Power BI integration"
 readme = "README.md"
 license = {text = "MIT"}
