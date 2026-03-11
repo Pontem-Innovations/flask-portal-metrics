@@ -217,7 +217,7 @@ class PortalMetrics:
         self._validate_config(app)
 
         # Create models
-        self.models = create_models(db, self.config.schema)
+        self.models = create_models(self.db, self.config.schema)
 
         # Initialize middleware
         self._middleware = MetricsMiddleware(
